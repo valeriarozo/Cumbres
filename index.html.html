@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hall of Fame — Colegio Cumbres</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --black: #080808;
+    --white: #f5f3ef;
+    --blue-deep: #0a1628;
+    --blue-mid: #1a3a6e;
+    --blue-bright: #2563b8;
+    --blue-electric: #3b82f6;
+    --blue-glow: #60a5fa;
+    --gold-light: #e8c97a;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--black); color: var(--white);
+    font-family: 'Montserrat', sans-serif; font-weight: 300;
+    overflow-x: hidden; cursor: none;
+  }
+  .cursor {
+    position: fixed; width: 8px; height: 8px;
+    background: var(--blue-electric); border-radius: 50%;
+    pointer-events: none; z-index: 9999;
+    transform: translate(-50%,-50%); mix-blend-mode: screen;
+  }
+  .cursor-follow {
+    position: fixed; width: 36px; height: 36px;
+    border: 1px solid rgba(59,130,246,0.4); border-radius: 50%;
+    pointer-events: none; z-index: 9998;
+    transform: translate(-50%,-50%); mix-blend-mode: screen;
+    transition: left 0.1s, top 0.1s;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 2rem 4rem; display: flex; justify-content: space-between; align-items: center;
+    background: linear-gradient(to bottom, rgba(8,8,8,0.95), transparent);
+  }
+  .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; letter-spacing: 0.3em; text-transform: uppercase; }
+  .nav-cta {
+    font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--blue-glow); border: 1px solid rgba(96,165,250,0.3);
+    padding: 0.6rem 1.4rem; transition: all 0.3s; text-decoration: none;
+  }
+  .nav-cta:hover { background: rgba(96,165,250,0.1); border-color: var(--blue-glow); }
+
+  /* HERO */
+  .hero {
+    height: 100vh; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 50% 60%, rgba(26,58,110,0.3) 0%, transparent 70%); }
+  .hero-particles { position: absolute; inset: 0; overflow: hidden; }
+  .particle { position: absolute; width: 2px; height: 2px; background: var(--blue-electric); border-radius: 50%; animation: floatUp linear infinite; opacity: 0; }
+  @keyframes floatUp { 0% { transform: translateY(100vh); opacity: 0; } 10% { opacity: 0.6; } 90% { opacity: 0.3; } 100% { transform: translateY(-10vh); opacity: 0; } }
+  .hero-label { font-size: 0.6rem; letter-spacing: 0.5em; text-transform: uppercase; color: var(--blue-glow); margin-bottom: 2rem; opacity: 0; animation: fadeUp 1s 0.3s forwards; }
+  .hero-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(4rem, 10vw, 9rem); font-weight: 300; line-height: 0.9; letter-spacing: -0.02em; margin-bottom: 1rem; opacity: 0; animation: fadeUp 1s 0.5s forwards; }
+  .hero-title span { display: block; font-style: italic; background: linear-gradient(135deg, var(--blue-glow), var(--blue-electric), var(--gold-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .hero-subtitle { font-size: 0.75rem; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(245,243,239,0.5); margin-top: 2.5rem; opacity: 0; animation: fadeUp 1s 0.8s forwards; }
+  .hero-scroll { position: absolute; bottom: 3rem; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 0.5rem; opacity: 0; animation: fadeUp 1s 1.2s forwards; }
+  .hero-scroll span { font-size: 0.55rem; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(245,243,239,0.4); }
+  .scroll-line { width: 1px; height: 60px; background: linear-gradient(to bottom, var(--blue-electric), transparent); animation: scrollPulse 2s ease-in-out infinite; }
+  @keyframes scrollPulse { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* INTRO */
+  .intro { padding: 8rem 4rem; max-width: 900px; margin: 0 auto; text-align: center; }
+  .intro p { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 300; line-height: 1.5; color: rgba(245,243,239,0.85); font-style: italic; }
+  .intro p em { font-style: normal; color: var(--blue-glow); }
+
+  /* COUNTER */
+  .counter-section { padding: 4rem; display: flex; justify-content: center; gap: 6rem; border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .counter-item { text-align: center; }
+  .counter-number { font-family: 'Cormorant Garamond', serif; font-size: 4rem; font-weight: 300; background: linear-gradient(135deg, var(--blue-electric), var(--blue-glow)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; display: block; }
+  .counter-label { font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(245,243,239,0.4); margin-top: 0.3rem; }
+
+  /* CAROUSEL */
+  .carousel-section { padding: 6rem 0; }
+  .carousel-tabs { display: flex; justify-content: center; gap: 2.5rem; margin-bottom: 1rem; }
+  .tab-btn { font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase; background: none; border: none; color: rgba(245,243,239,0.35); cursor: none; padding-bottom: 0.4rem; border-bottom: 1px solid transparent; transition: all 0.3s; }
+  .tab-btn.active { color: var(--blue-glow); border-color: var(--blue-glow); }
+  .carousel-header { padding: 0 4rem; margin-bottom: 3rem; display: flex; align-items: center; gap: 1.5rem; }
+  .carousel-label { font-size: 0.6rem; letter-spacing: 0.5em; text-transform: uppercase; color: var(--blue-glow); }
+  .carousel-header::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, rgba(96,165,250,0.3), transparent); }
+
+  .carousel-viewport { overflow: hidden; position: relative; padding: 4rem 0; }
+  .carousel-viewport::before, .carousel-viewport::after {
+    content: ''; position: absolute; top: 0; bottom: 0; width: 180px; z-index: 10; pointer-events: none;
+  }
+  .carousel-viewport::before { left: 0; background: linear-gradient(to right, var(--black) 20%, transparent); }
+  .carousel-viewport::after  { right: 0; background: linear-gradient(to left, var(--black) 20%, transparent); }
+
+  .carousel-track {
+    display: flex; align-items: center; gap: 3rem;
+    transition: transform 0.6s cubic-bezier(0.77,0,0.175,1);
+    will-change: transform;
+  }
+
+  .alumni-card {
+    flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 1rem;
+    cursor: none;
+    transition: opacity 0.5s, transform 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .alumni-card:not(.active) { opacity: 0.4; transform: scale(0.82); }
+  .alumni-card.active { opacity: 1; transform: scale(1); }
+
+  .circle-wrap {
+    border-radius: 50%; position: relative;
+    width: 130px; height: 130px;
+    transition: width 0.5s, height 0.5s;
+  }
+  .alumni-card.active .circle-wrap { width: 210px; height: 210px; }
+
+  .circle-spin {
+    position: absolute; inset: -3px; border-radius: 50%;
+    background: conic-gradient(from 0deg, var(--blue-deep), var(--blue-mid), var(--blue-electric), var(--blue-glow), var(--blue-electric), var(--blue-mid), var(--blue-deep));
+    opacity: 0; transition: opacity 0.4s;
+    animation: spin 5s linear infinite;
+  }
+  .alumni-card.active .circle-spin { opacity: 1; }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  .circle-inner {
+    position: absolute; inset: 3px; border-radius: 50%; overflow: hidden;
+    background: var(--blue-deep);
+  }
+  .circle-photo { width: 100%; height: 100%; object-fit: cover; filter: grayscale(30%) contrast(1.1); transition: filter 0.5s, transform 0.5s; }
+  .alumni-card.active .circle-photo { filter: grayscale(0%) contrast(1.05); transform: scale(1.03); }
+  .circle-overlay { position: absolute; inset: 0; border-radius: 50%; background: linear-gradient(135deg, rgba(10,22,40,0.5), rgba(26,58,110,0.2)); transition: opacity 0.4s; }
+  .alumni-card.active .circle-overlay { opacity: 0; }
+
+  .card-name { font-size: 0.72rem; letter-spacing: 0.08em; text-align: center; color: var(--white); max-width: 140px; line-height: 1.4; transition: font-size 0.4s, max-width 0.4s; }
+  .alumni-card.active .card-name { font-size: 0.85rem; max-width: 200px; }
+  .card-role { font-size: 0.58rem; letter-spacing: 0.08em; text-align: center; color: var(--blue-glow); max-width: 140px; line-height: 1.4; margin-top: -0.4rem; transition: max-width 0.4s; }
+  .alumni-card.active .card-role { max-width: 200px; }
+
+  .click-hint { font-size: 0.5rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(96,165,250,0.5); opacity: 0; transition: opacity 0.3s; }
+  .alumni-card.active .click-hint { opacity: 1; }
+
+  .carousel-controls { display: flex; justify-content: center; gap: 1.5rem; margin-top: 2.5rem; }
+  .carousel-btn { width: 48px; height: 48px; border-radius: 50%; border: 1px solid rgba(96,165,250,0.25); background: transparent; color: var(--blue-glow); font-size: 1.2rem; cursor: none; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
+  .carousel-btn:hover { background: rgba(96,165,250,0.1); border-color: var(--blue-glow); }
+  .carousel-btn:disabled { opacity: 0.2; }
+
+  /* RESERVED */
+  .reserved-section { padding: 8rem 4rem; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; }
+  .reserved-section::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(26,58,110,0.15) 0%, transparent 70%); }
+  .reserved-circle { width: 180px; height: 180px; border-radius: 50%; border: 1px dashed rgba(96,165,250,0.4); display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 3rem; animation: pulse 3s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(59,130,246,0.1); border-color: rgba(96,165,250,0.4); } 50% { box-shadow: 0 0 40px 10px rgba(59,130,246,0.08); border-color: rgba(96,165,250,0.7); } }
+  .reserved-inner { font-family: 'Cormorant Garamond', serif; font-size: 0.85rem; font-style: italic; color: rgba(245,243,239,0.5); text-align: center; line-height: 1.5; padding: 1rem; }
+  .reserved-inner strong { display: block; font-size: 1rem; color: var(--blue-glow); font-style: normal; font-weight: 400; margin-bottom: 0.3rem; }
+  .reserved-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 300; line-height: 1.2; margin-bottom: 1rem; }
+  .reserved-title span { font-style: italic; background: linear-gradient(135deg, var(--blue-glow), var(--gold-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .reserved-sub { font-size: 0.75rem; letter-spacing: 0.1em; color: rgba(245,243,239,0.5); max-width: 480px; line-height: 1.8; margin-bottom: 3rem; }
+
+  /* FORM */
+  .fame-form { background: linear-gradient(135deg, rgba(10,22,40,0.9), rgba(26,58,110,0.2)); border: 1px solid rgba(96,165,250,0.15); padding: 3.5rem; max-width: 520px; width: 100%; position: relative; z-index: 1; }
+  .form-eyebrow { font-size: 0.55rem; letter-spacing: 0.5em; text-transform: uppercase; color: var(--blue-glow); margin-bottom: 0.5rem; }
+  .form-title { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 300; margin-bottom: 0.5rem; }
+  .form-desc { font-size: 0.65rem; color: rgba(245,243,239,0.45); line-height: 1.7; margin-bottom: 2.5rem; }
+  .form-field { margin-bottom: 1.5rem; }
+  .form-field label { display: block; font-size: 0.55rem; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(245,243,239,0.5); margin-bottom: 0.5rem; }
+  .form-field input, .form-field select { width: 100%; background: rgba(255,255,255,0.03); border: none; border-bottom: 1px solid rgba(96,165,250,0.2); padding: 0.8rem 0; color: var(--white); font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 300; outline: none; transition: border-color 0.3s; cursor: none; }
+  .form-field select option { background: #0a1628; }
+  .form-field input:focus, .form-field select:focus { border-color: var(--blue-electric); }
+  .form-field input::placeholder { color: rgba(245,243,239,0.2); }
+  .form-submit { width: 100%; padding: 1.1rem; background: linear-gradient(135deg, var(--blue-mid), var(--blue-bright)); border: none; color: var(--white); font-family: 'Montserrat', sans-serif; font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase; cursor: none; transition: all 0.3s; margin-top: 1rem; position: relative; overflow: hidden; }
+  .form-submit::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--blue-bright), var(--blue-electric)); opacity: 0; transition: opacity 0.3s; }
+  .form-submit:hover::after { opacity: 1; }
+  .form-submit span { position: relative; z-index: 1; }
+
+  footer { padding: 3rem 4rem; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; }
+  .footer-logo { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(245,243,239,0.4); }
+  .footer-note { font-size: 0.55rem; letter-spacing: 0.2em; color: rgba(245,243,239,0.25); text-transform: uppercase; }
+
+  /* MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(8,8,8,0.92); backdrop-filter: blur(20px); z-index: 500; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.4s; }
+  .modal-overlay.active { opacity: 1; pointer-events: all; }
+  .modal { background: linear-gradient(135deg, rgba(10,22,40,0.98), rgba(26,58,110,0.3)); border: 1px solid rgba(96,165,250,0.2); max-width: 600px; width: 90%; padding: 3.5rem; position: relative; transform: scale(0.9); transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+  .modal-overlay.active .modal { transform: scale(1); }
+  .modal-close { position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; color: rgba(245,243,239,0.4); font-size: 1.2rem; cursor: none; transition: color 0.3s; }
+  .modal-close:hover { color: var(--white); }
+  .modal-photo-wrap { display: flex; align-items: center; gap: 2rem; margin-bottom: 2rem; }
+  .modal-circle { width: 90px; height: 90px; border-radius: 50%; overflow: hidden; border: 2px solid var(--blue-electric); flex-shrink: 0; }
+  .modal-circle img { width: 100%; height: 100%; object-fit: cover; }
+  .modal-name { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 300; line-height: 1.1; }
+  .modal-role { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--blue-glow); margin-top: 0.4rem; }
+  .modal-quote { font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; font-style: italic; color: rgba(245,243,239,0.85); line-height: 1.6; margin-bottom: 1.5rem; padding-left: 1.5rem; border-left: 2px solid var(--blue-electric); }
+  .modal-audio { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.5rem; background: rgba(96,165,250,0.05); border: 1px solid rgba(96,165,250,0.15); margin-bottom: 1.5rem; }
+  .audio-btn { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--blue-mid), var(--blue-bright)); border: none; display: flex; align-items: center; justify-content: center; cursor: none; flex-shrink: 0; transition: transform 0.2s; }
+  .audio-btn:hover { transform: scale(1.1); }
+  .audio-btn svg { width: 14px; height: 14px; fill: white; margin-left: 2px; }
+  .audio-label { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(245,243,239,0.5); }
+  .modal-about { font-size: 0.72rem; line-height: 1.8; color: rgba(245,243,239,0.6); }
+
+  .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.8s, transform 0.8s; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-follow" id="cursorFollow"></div>
+
+<nav>
+  <div class="nav-logo">Colegio Cumbres</div>
+  <a href="#inscripcion" class="nav-cta">Inscríbete al Open Day</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-particles" id="particles"></div>
+  <div class="hero-label">Colegio Cumbres · Medellín · 30 años</div>
+  <h1 class="hero-title">Hall of<span>Fame</span></h1>
+  <p class="hero-subtitle">Esto es lo que formamos</p>
+  <div class="hero-scroll"><div class="scroll-line"></div><span>Descubre</span></div>
+</section>
+
+<section class="intro reveal">
+  <p>Durante 30 años, Cumbres ha formado personas que hoy <em>lideran, construyen y transforman</em> el mundo desde Colombia y más allá.</p>
+</section>
+
+<div class="counter-section">
+  <div class="counter-item reveal"><span class="counter-number" data-target="30">0</span><span class="counter-label">Años formando líderes</span></div>
+  <div class="counter-item reveal"><span class="counter-number" data-target="1200">0</span><span class="counter-label">Egresados</span></div>
+  <div class="counter-item reveal"><span class="counter-number" data-target="12">0</span><span class="counter-label">Países</span></div>
+</div>
+
+<section class="carousel-section reveal">
+  <div class="carousel-tabs">
+    <button class="tab-btn active" onclick="switchGroup('colombia',this)">Colombia</button>
+    <button class="tab-btn" onclick="switchGroup('world',this)">En el mundo</button>
+  </div>
+  <div class="carousel-header">
+    <span class="carousel-label" id="carouselLabel">Colombia</span>
+  </div>
+  <div class="carousel-viewport">
+    <div class="carousel-track" id="carouselTrack"></div>
+  </div>
+  <div class="carousel-controls">
+    <button class="carousel-btn" id="btnPrev" onclick="moveCarousel(-1)">&#8592;</button>
+    <button class="carousel-btn" id="btnNext" onclick="moveCarousel(1)">&#8594;</button>
+  </div>
+</section>
+
+<section class="reserved-section" id="inscripcion">
+  <div class="reserved-circle reveal">
+    <div class="reserved-inner"><strong>Reservado</strong>para tu hijo</div>
+  </div>
+  <h2 class="reserved-title reveal">El próximo lugar <span>es de tu familia</span></h2>
+  <p class="reserved-sub reveal">Más de mil familias eligieron Cumbres y hoy sus hijos lideran el país y el mundo. ¿Quieres que el tuyo sea el siguiente?</p>
+  <div class="fame-form reveal">
+    <div class="form-eyebrow">Inscripción</div>
+    <div class="form-title">Escribe tu nombre en la historia</div>
+    <p class="form-desc">Completa tus datos y te contactaremos para confirmar tu participación en el Open Day Cumbres y conocer el colegio de cerca.</p>
+    <div class="form-field"><label>Nombre completo</label><input type="text" placeholder="Tu nombre"></div>
+    <div class="form-field"><label>Correo electrónico</label><input type="email" placeholder="tu@correo.com"></div>
+    <div class="form-field"><label>Teléfono</label><input type="tel" placeholder="+57"></div>
+    <div class="form-field">
+      <label>Edad del hijo(a)</label>
+      <select>
+        <option value="">Selecciona</option>
+        <option>3 - 5 años (Preescolar)</option>
+        <option>6 - 8 años (Primaria)</option>
+        <option>9 - 11 años (Primaria)</option>
+        <option>12 - 14 años (Secundaria)</option>
+        <option>15 - 17 años (Media)</option>
+      </select>
+    </div>
+    <button class="form-submit" onclick="handleSubmit()"><span>Quiero hacer parte de la historia</span></button>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">Colegio Cumbres · Medellín</div>
+  <div class="footer-note">30 años formando líderes</div>
+</footer>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-photo-wrap">
+      <div class="modal-circle"><img id="modalPhoto" src="" alt=""></div>
+      <div class="modal-meta">
+        <div class="modal-name" id="modalName"></div>
+        <div class="modal-role" id="modalRole"></div>
+      </div>
+    </div>
+    <blockquote class="modal-quote" id="modalQuote"></blockquote>
+    <div class="modal-audio">
+      <button class="audio-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+      <span class="audio-label">Escucha su testimonio</span>
+    </div>
+    <p class="modal-about" id="modalAbout"></p>
+  </div>
+</div>
+
+<script>
+const groups = {
+  colombia: [
+    { name: "Valentina Ríos", role: "Fundadora, startup de impacto social", quote: "Cumbres me enseñó que liderar es servir. Eso lo cargo a donde voy.", about: "Fundó Raíz Digital a los 27 años, conectando comunidades rurales con mercados urbanos. Hoy opera en 6 departamentos con 40 empleados.", photo: "https://randomuser.me/api/portraits/women/44.jpg" },
+    { name: "Santiago Mejía", role: "Médico e investigador, U. de Antioquia", quote: "Aprendí a preguntar antes de responder. Eso cambió cómo ejerzo la medicina.", about: "Especialista en salud pública. Lidera el programa de medicina rural en Antioquia con investigaciones publicadas en tres revistas internacionales.", photo: "https://randomuser.me/api/portraits/men/32.jpg" },
+    { name: "Lucía Arango", role: "Directora Creativa, Leo Burnett Colombia", quote: "Cumbres me enseñó que la creatividad no es un talento, es una disciplina.", about: "Ganó el Premio Effie Colombia 2023. Ha dirigido campañas para Bancolombia y Grupo Éxito.", photo: "https://randomuser.me/api/portraits/women/68.jpg" },
+    { name: "Felipe Restrepo", role: "CEO, Grupo Terrón", quote: "Salí de Cumbres sabiendo que los retos son oportunidades disfrazadas.", about: "Creó Grupo Terrón a los 25 años. Tres marcas de restaurantes con presencia en Medellín y Bogotá.", photo: "https://randomuser.me/api/portraits/men/55.jpg" },
+    { name: "Isabela Torres", role: "Jueza, Tribunal Superior de Medellín", quote: "La formación en valores fue mi brújula. Todavía lo es.", about: "Una de las juezas más jóvenes en ocupar cargo en el Tribunal Superior. Maestría en derecho constitucional.", photo: "https://randomuser.me/api/portraits/women/23.jpg" },
+    { name: "Daniel Londoño", role: "Arquitecto, Premio Bienal Colombiana", quote: "Diseñar espacios que transformen vidas empieza por entender a las personas.", about: "Premio Bienal Colombiana de Arquitectura 2022. Su proyecto de vivienda sostenible en Bello fue reconocido internacionalmente.", photo: "https://randomuser.me/api/portraits/men/78.jpg" },
+  ],
+  world: [
+    { name: "Andrés Vélez", role: "Ingeniero, NASA Jet Propulsion Lab · EE.UU.", quote: "Lo que más uso del colegio no es lo que aprendí, sino cómo aprendí.", about: "Diseña sistemas de propulsión para misiones espaciales. Egresó de Cumbres en 2009 y estudió en el MIT.", photo: "https://randomuser.me/api/portraits/men/41.jpg" },
+    { name: "Mariana Cárdenas", role: "Investigadora, Universidad de Cambridge · UK", quote: "Cumbres me enseñó a cuestionarlo todo con respeto. Eso es ciencia.", about: "Doctora en neurociencias cognitivas. Su investigación ha sido citada en más de 80 publicaciones internacionales.", photo: "https://randomuser.me/api/portraits/women/56.jpg" },
+    { name: "Tomás Herrera", role: "Chef estrella Michelin · España", quote: "La identidad que Cumbres me dio me enseñó a llevar Colombia al mundo.", about: "Su restaurante Origen en Madrid celebra la gastronomía colombiana con técnicas europeas de vanguardia.", photo: "https://randomuser.me/api/portraits/men/12.jpg" },
+    { name: "Sara Ossa", role: "Directora ONG en Ginebra · Suiza", quote: "Fui formada para dar, no solo para recibir. Eso define mi trabajo.", about: "Lidera una organización de derechos humanos en 14 países. Forbes la nombró entre las 40 líderes menores de 40.", photo: "https://randomuser.me/api/portraits/women/33.jpg" },
+  ]
+};
+
+let currentGroup = 'colombia';
+let currentIndex = 1;
+
+function buildCarousel(group) {
+  const track = document.getElementById('carouselTrack');
+  track.innerHTML = '';
+  groups[group].forEach((a, i) => {
+    const card = document.createElement('div');
+    card.className = 'alumni-card' + (i === currentIndex ? ' active' : '');
+    card.innerHTML = `
+      <div class="circle-wrap">
+        <div class="circle-spin"></div>
+        <div class="circle-inner">
+          <img class="circle-photo" src="${a.photo}" alt="${a.name}">
+          <div class="circle-overlay"></div>
+        </div>
+      </div>
+      <div class="card-name">${a.name}</div>
+      <div class="card-role">${a.role.split(',')[0]}</div>
+      <div class="click-hint">Toca para conocer su historia</div>
+    `;
+    card.addEventListener('click', () => {
+      if (i === currentIndex) openModal(a);
+      else { currentIndex = i; updateCarousel(); }
+    });
+    track.appendChild(card);
+  });
+  updateCarousel();
+}
+
+function updateCarousel() {
+  const track = document.getElementById('carouselTrack');
+  const cards = Array.from(track.children);
+  cards.forEach((c, i) => c.classList.toggle('active', i === currentIndex));
+
+  // Center active card
+  const vw = window.innerWidth;
+  // measure card width dynamically
+  const activeCard = cards[currentIndex];
+  if (!activeCard) return;
+  let offset = 0;
+  for (let i = 0; i < currentIndex; i++) {
+    offset += cards[i].offsetWidth + 48; // 3rem gap
+  }
+  const activeW = activeCard.offsetWidth;
+  const translate = (vw / 2) - offset - (activeW / 2);
+  track.style.transform = `translateX(${translate}px)`;
+
+  const n = groups[currentGroup].length;
+  document.getElementById('btnPrev').disabled = currentIndex === 0;
+  document.getElementById('btnNext').disabled = currentIndex === n - 1;
+}
+
+function moveCarousel(dir) {
+  const n = groups[currentGroup].length;
+  currentIndex = Math.max(0, Math.min(n - 1, currentIndex + dir));
+  updateCarousel();
+}
+
+function switchGroup(group, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentGroup = group;
+  currentIndex = 1;
+  document.getElementById('carouselLabel').textContent = group === 'colombia' ? 'Colombia' : 'En el mundo';
+  buildCarousel(group);
+}
+
+buildCarousel('colombia');
+window.addEventListener('resize', updateCarousel);
+
+// Modal
+function openModal(a) {
+  document.getElementById('modalName').textContent = a.name;
+  document.getElementById('modalRole').textContent = a.role;
+  document.getElementById('modalQuote').textContent = '\u201c' + a.quote + '\u201d';
+  document.getElementById('modalAbout').textContent = a.about;
+  document.getElementById('modalPhoto').src = a.photo;
+  document.getElementById('modalOverlay').classList.add('active');
+}
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').classList.remove('active');
+}
+
+// Counters
+new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    const target = +e.target.dataset.target;
+    let cur = 0; const step = target / 60;
+    const iv = setInterval(() => {
+      cur = Math.min(cur + step, target);
+      e.target.textContent = Math.floor(cur) + (target === 1200 ? '+' : '');
+      if (cur >= target) clearInterval(iv);
+    }, 25);
+  });
+}, { threshold: 0.5 }).observe(document.querySelector('[data-target]'));
+document.querySelectorAll('[data-target]').forEach(c => {
+  new IntersectionObserver((en) => { en.forEach(e => { if (!e.isIntersecting) return; const t = +e.target.dataset.target; let cur = 0; const iv = setInterval(() => { cur = Math.min(cur + t/60, t); e.target.textContent = Math.floor(cur) + (t===1200?'+':''); if(cur>=t) clearInterval(iv); },25); }); }, {threshold:0.5}).observe(c);
+});
+
+// Reveal
+new IntersectionObserver((en) => en.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }), {threshold: 0.1})
+  .observe(document.body); // dummy; real below
+document.querySelectorAll('.reveal').forEach(el =>
+  new IntersectionObserver((en) => en.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }), {threshold:0.1}).observe(el)
+);
+
+// Cursor
+const cur = document.getElementById('cursor');
+const fol = document.getElementById('cursorFollow');
+document.addEventListener('mousemove', e => {
+  cur.style.left = e.clientX + 'px'; cur.style.top = e.clientY + 'px';
+  fol.style.left = e.clientX + 'px'; fol.style.top = e.clientY + 'px';
+});
+
+// Particles
+const pc = document.getElementById('particles');
+for (let i = 0; i < 30; i++) {
+  const p = document.createElement('div'); p.className = 'particle';
+  p.style.cssText = `left:${Math.random()*100}%;animation-duration:${6+Math.random()*12}s;animation-delay:${Math.random()*10}s;width:${1+Math.random()*2}px;height:${1+Math.random()*2}px`;
+  pc.appendChild(p);
+}
+
+function handleSubmit() {
+  const s = document.querySelector('.form-submit');
+  s.querySelector('span').textContent = '¡Tu lugar está reservado!';
+  s.style.background = 'linear-gradient(135deg,#1a5c2e,#22c55e)';
+}
+</script>
+</body>
+</html>
